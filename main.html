@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Board</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .board {
+      display: flex;
+      justify-content: space-around;
+      padding: 20px;
+    }
+    .status {
+      flex: 1;
+      margin: 0 10px;
+      padding: 10px;
+      background-color: #f4f4f4;
+      border-radius: 5px;
+    }
+    .status h2 {
+      margin-top: 0;
+    }
+    .task {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .task:hover {
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="board">
+    <div class="status" id="todo">
+      <h2>Todo <span id="todo-count">(0)</span></h2>
+      <button onclick="addTask('todo')">New</button>
+    </div>
+    <div class="status" id="in-progress">
+      <h2>In Progress <span id="in-progress-count">(0)</span></h2>
+      <button onclick="addTask('in-progress')">New</button>
+    </div>
+    <div class="status" id="done">
+      <h2>Done <span id="done-count">(0)</span></h2>
+      <button onclick="addTask('done')">New</button>
+    </div>
+  </div>
+
+  <script>
+    // Initialize tasks
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || {
+      'todo': [],
+      'in-progress': [],
+      'done': []
+    };
+
+    // Display count of cards under each status
+    function displayCount() {
+      document.getElementById('todo-count').textContent = `(${tasks['todo'].length})`;
+      document.getElementById('in-progress-count').textContent = `(${tasks['in-progress'].length})`;
+      document.getElementById('done-count').textContent = `(${tasks['done'].length})`;
+    }
+
+    // Render tasks
+    function renderTasks() {
+      for (let status in tasks) {
+        let statusElement = document.getElementById(status);
+        statusElement.innerHTML = `<h2>${status[0].toUpperCase() + status.slice(1)} <span id="${status}-count">(${tasks[status].length})</span></h2>
+                                   <button onclick="addTask('${status}')">New</button>`;
+        tasks[status].forEach(task => {
+          let taskElement = document.createElement('div');
+          taskElement.classList.add('task');
+          taskElement.textContent = task.title;
+          taskElement.onclick = () => openTaskDetails(task, status);
+          statusElement.appendChild(taskElement);
+        });
+      }
+    }
+
+    // Add new task
+    function addTask(status) {
+      let title = prompt('Enter task title:');
+      if (title) {
+        let newTask = { title, description: '', status };
+        tasks[status].push(newTask);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        renderTasks();
+      }
+    }
+
+    // Open task details
+    function openTaskDetails(task, status) {
+      let newTitle = prompt('Update task title:', task.title);
+      if (newTitle !== null) {
+        task.title = newTitle;
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        renderTasks();
+      }
+    }
+
+    // Initial rendering
+    displayCount();
+    renderTasks();
+  </script>
+</body>
+</html>
